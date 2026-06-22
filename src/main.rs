@@ -22,8 +22,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         argparser.seed.unwrap_or_else( rand::random )
     );
 
-    let mut randomnoise = algo::random_noise::RandomNoise::new(rand_thr);
-    randomnoise.draw(&mut image);
+    let mut algorithm: Box<dyn Aglorithm> = Box::new(algo::random_noise::RandomNoise::new(rand_thr));
+    algorithm.draw(&mut image);
 
     let savepath_name = argparser.output_path.unwrap_or("output.png".to_string());
     let path = Path::new(&savepath_name);
