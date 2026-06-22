@@ -22,7 +22,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         argparser.seed.unwrap_or_else( rand::random )
     );
 
-    let mut algorithm: Box<dyn Aglorithm> = Box::new(algo::random_noise::RandomNoise::new(rand_thr));
+    let algorithms = &["Random", "Perlin"];
+    let selection = dialoguer::Select::new()
+        .with_prompt("Choose your algorithm")
+        .items(algorithms)
+        .interact()?;
+
+    let mut algorithm: Box<dyn Aglorithm> = match selection {
+        0 => Box::new(algo::random_noise::RandomNoise::new(rand_thr)),
+        1 => Box::new(algo::perlin::Perlin::new(rand_thr)),
+        _ => unreachable!()
+    };
+
     algorithm.draw(&mut image);
 
     let savepath_name = argparser.output_path.unwrap_or("output.png".to_string());
