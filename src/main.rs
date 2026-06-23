@@ -22,17 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         argparser.seed.unwrap_or_else( rand::random )
     );
 
-    let algorithms = &["Random", "Perlin"];
-    let selection = dialoguer::Select::new()
-        .with_prompt("Choose your algorithm")
-        .items(algorithms)
-        .interact()?;
-
-    let mut algorithm: Box<dyn Aglorithm> = match selection {
-        0 => Box::new(algo::random_noise::RandomNoise::new(rand_thr)),
-        1 => Box::new(algo::perlin::Perlin::new(rand_thr)),
-        _ => unreachable!()
-    };
+    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr)?;
 
     algorithm.draw(&mut image);
 
@@ -51,6 +41,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     writer.write_image_data(&image_data)?;
     writer.finish()?;
 
-    println!("Succeed!");
     Ok(())
+}
+
+fn create_mode(rand_thr: ChaCha8Rng) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
+    let algorithms = &["Random", "Perlin"];
+    let selection = dialoguer::Select::new()
+        .with_prompt("Choose your algorithm")
+        .items(algorithms)
+        .interact()?;
+
+    let box_: Box<dyn Aglorithm> = match selection {
+        0 => Box::new(algo::random_noise::RandomNoise::new(rand_thr)),
+        1 => Box::new(algo::perlin::Perlin::new(
+            rand_thr,
+            util::input_opt("Octaves", "4")?,
+            util::input_opt("Persistence", "0.5")?,
+            util::input_opt("Lacunarity", "2.0")?,
+        )),
+        _ => unreachable!()
+    };
+
+    Ok(box_)
 }
