@@ -16,3 +16,9 @@ rand_chacha = "0.10.0"
 
 [dev-dependencies]
 insta = "1.48.0"
+
+[profile.dist]
+inherits = "release"
+lto = true
+codegen-units = 1
+strip = true
