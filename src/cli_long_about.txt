@@ -1,1 +1,1 @@
-noisegen - cli app to generate images containing noise
+CLI tool to generate PNG images with procedural noise. Supports Perlin noise with configurable fractal Brownian motion (fBM).
