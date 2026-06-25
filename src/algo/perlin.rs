@@ -166,7 +166,7 @@ use rand::SeedableRng;
     }
 
     #[test]
-    fn perlin_clamps() {
+    fn perlin_clamp() {
         let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
         let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(2), None, None);
         let mut image = crate::image::Image::new(DEFAULT_SIZE);
@@ -183,7 +183,7 @@ use rand::SeedableRng;
     }
 
     #[test]
-    fn perlin_determine() {
+    fn perlin_determined() {
         let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
         {
             let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
@@ -207,5 +207,68 @@ use rand::SeedableRng;
             *lattice.get_wrapped(0, 0),
             *lattice.get_wrapped(4, 4),
         );
+    }
+
+    #[test]
+    fn octaves_influence() {
+        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(1), None, None);
+            perlin.draw(&mut result[0]);
+        }
+
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(2), None, None);
+            perlin.draw(&mut result[1]);
+        }
+
+        assert_ne!(result[0].pixels, result[1].pixels);
+    }
+
+    #[test]
+    fn persistence_influence() {
+        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, None, Some(0.5), None);
+            perlin.draw(&mut result[0]);
+        }
+
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, None, Some(0.7), None);
+            perlin.draw(&mut result[1]);
+        }
+
+        assert_ne!(result[0].pixels, result[1].pixels);
+    }
+
+    #[test]
+    fn lacunarity_influence() {
+        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, None, None, Some(1.0));
+            perlin.draw(&mut result[0]);
+        }
+
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, None, None, Some(2.0));
+            perlin.draw(&mut result[1]);
+        }
+
+        assert_ne!(result[0].pixels, result[1].pixels);
+    }
+
+    #[test]
+    fn perlin_snapshot() {
+        let rng = ChaCha8Rng::seed_from_u64(42);
+        let mut perlin = Perlin::new((8, 8), rng, Some(2), None, None);
+        let mut image = crate::image::Image::new(DEFAULT_SIZE);
+        perlin.draw(&mut image);
+        insta::assert_debug_snapshot!(image.pixels);
     }
 }
