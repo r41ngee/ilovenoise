@@ -37,8 +37,8 @@ impl Perlin {
 
 impl super::Aglorithm for Perlin {
     fn draw(&mut self, image: &mut crate::image::Image) {
-        let grid_w = (self.size.0 / self.frequency + 1) as usize;
-        let grid_h = (self.size.1 / self.frequency + 1) as usize;
+        let grid_w = self.size.0 / self.frequency + 1;
+        let grid_h = self.size.1 / self.frequency + 1;
         let lattice = Lattice::generate((grid_w, grid_h), &mut self.rng_thr);
 
         for py in 0..self.size.1 {
@@ -90,31 +90,31 @@ impl super::Aglorithm for Perlin {
 #[derive(Debug, Clone)]
 struct Lattice {
     data: Vec<Vector>,
-    size: (usize, usize),
+    size: (u32, u32),
 }
 
 impl Index<(usize, usize)> for Lattice {
     type Output = Vector;
     fn index(&self, (x, y): (usize, usize)) -> &Self::Output {
-        &self.data[y * self.size.0 + x]
+        &self.data[y * self.size.0 as usize + x]
     }
 }
 
 impl IndexMut<(usize, usize)> for Lattice {
     fn index_mut(&mut self, (x, y): (usize, usize)) -> &mut Self::Output {
-        &mut self.data[y * self.size.0 + x]
+        &mut self.data[y * self.size.0 as usize + x]
     }
 }
 
 impl Lattice {
-    fn new(size: (usize, usize)) -> Self {
+    fn new(size: (u32, u32)) -> Self {
         Self {
             size,
-            data: vec![Vector::default(); size.0 * size.1],
+            data: vec![Vector::default(); (size.0 * size.1) as usize],
         }
     }
 
-    fn generate(size: (usize, usize), rng: &mut ChaCha8Rng) -> Self {
+    fn generate(size: (u32, u32), rng: &mut ChaCha8Rng) -> Self {
         let mut lattice = Self::new(size);
         for v in &mut lattice.data {
             v.randomize(rng);
@@ -125,7 +125,7 @@ impl Lattice {
     fn get_wrapped(&self, x: i64, y: i64) -> &Vector {
         let mx = x.rem_euclid(self.size.0 as i64) as usize;
         let my = y.rem_euclid(self.size.1 as i64) as usize;
-        &self.data[my * self.size.0 + mx]
+        &self.data[my * self.size.0 as usize + mx]
     }
 }
 

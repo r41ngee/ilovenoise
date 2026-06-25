@@ -15,17 +15,17 @@ mod algo;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let argparser = cli::Cli::parse();
-    let (width, height) = (argparser.width, argparser.height);
-    if width % 8 != 0 || height % 8 != 0 {
+    let size = (argparser.width, argparser.height);
+    if size.0 % 8 != 0 || size.1 % 8 != 0 {
         return Err("Width and height must be multiples of 8".into());
     }
 
-    let mut image = image::Image::new(width, height);
+    let mut image = image::Image::new(size);
     let rand_thr = ChaCha8Rng::seed_from_u64(
         argparser.seed.unwrap_or_else( rand::random )
     );
 
-    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, (width, height), argparser.defaults)?;
+    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, size, argparser.defaults)?;
 
     algorithm.draw(&mut image);
 
@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file = File::create(path)?;
     let w = &mut BufWriter::new(file);
 
-    let mut encoder = png::Encoder::new(w, width, height);
+    let mut encoder = png::Encoder::new(w, size.0, size.1);
     encoder.set_color(png::ColorType::Rgba);
     encoder.set_depth(png::BitDepth::Eight);
 
