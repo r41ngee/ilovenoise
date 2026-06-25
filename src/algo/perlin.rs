@@ -129,7 +129,7 @@ impl Lattice {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 struct Vector {
     x: f32,
     y: f32,
@@ -146,5 +146,66 @@ impl Vector {
         let angle: f32 = rng.random_range(0.0..std::f32::consts::PI * 2.0);
         self.x = angle.cos();
         self.y = angle.sin();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ops::Range;
+
+use rand::SeedableRng;
+    use super::*;
+    use crate::algo::Aglorithm;
+
+    const DEFAULT_SEED: u64 = 42u64;
+    const DEFAULT_SIZE: (u32, u32) = (16, 16);
+
+    fn in_range<T: PartialOrd>(val: T, range: Range<T>) -> bool {
+        val <= range.end &&
+        val >= range.start
+    }
+
+    #[test]
+    fn perlin_clamps() {
+        let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+        let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(2), None, None);
+        let mut image = crate::image::Image::new(DEFAULT_SIZE);
+
+        perlin.draw(&mut image);
+
+        for p in image.pixels {
+            assert!(
+                in_range(p.r, 0u8..255u8) &&
+                in_range(p.g, 0u8..255u8) && 
+                in_range(p.b, 0u8..255u8)
+            )
+        }
+    }
+
+    #[test]
+    fn perlin_determine() {
+        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(2), None, None);
+            perlin.draw(&mut result[0]);
+        }
+
+        {
+            let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
+            let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(2), None, None);
+            perlin.draw(&mut result[1]);
+        }
+
+        assert_eq!(result[0].pixels, result[1].pixels);
+    }
+
+    #[test]
+    fn lattice_wrapping() {
+        let lattice = Lattice::new(DEFAULT_SIZE);
+        assert_eq!(
+            *lattice.get_wrapped(0, 0),
+            *lattice.get_wrapped(4, 4),
+        );
     }
 }
