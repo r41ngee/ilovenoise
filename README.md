@@ -5,7 +5,7 @@ CLI tool to generate PNG images with procedural noise. Supports Perlin noise wit
 ## Usage
 
 ```
-ilovenoise [-w 512] [-h 512] [-s <seed>] [-o output.png]
+ilovenoise [-w 512] [-h 512] [-s <seed>] [-o output.png] [-d]
 ```
 
 | Flag | Description | Default |
@@ -14,6 +14,7 @@ ilovenoise [-w 512] [-h 512] [-s <seed>] [-o output.png]
 | `-h` | Image height (must be multiple of 8) | `256` |
 | `-s` | Random seed (omit for random) | random |
 | `-o` | Output path | `output.png` |
+| `-d` | Automatical default settings usage |
 
 After launching, an interactive menu asks for:
 - **Algorithm**: `Random` (white noise) or `Perlin`
@@ -22,7 +23,7 @@ After launching, an interactive menu asks for:
   - `Persistence` — amplitude multiplier per octave (default: `0.5`)
   - `Lacunarity` — frequency multiplier per octave (default: `2.0`)
 
-Press Enter to accept defaults.
+Press Enter or use `-d` flag to accept defaults.
 
 ## Example
 

@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         argparser.seed.unwrap_or_else( rand::random )
     );
 
-    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, (width, height))?;
+    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, (width, height), argparser.defaults)?;
 
     algorithm.draw(&mut image);
 
@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn create_mode(rand_thr: ChaCha8Rng, size: (u32, u32)) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
+fn create_mode(rand_thr: ChaCha8Rng, size: (u32, u32), use_defaults: bool) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
     let algorithms = &["Random", "Perlin"];
     let selection = dialoguer::Select::new()
         .with_prompt("Choose your algorithm")
@@ -56,13 +56,21 @@ fn create_mode(rand_thr: ChaCha8Rng, size: (u32, u32)) -> Result<Box<dyn Aglorit
 
     let box_: Box<dyn Aglorithm> = match selection {
         0 => Box::new(algo::random_noise::RandomNoise::new(rand_thr)),
-        1 => Box::new(algo::perlin::Perlin::new(
+        1 => if !use_defaults { Box::new(algo::perlin::Perlin::new(
             size,
             rand_thr,
             util::input_opt("Octaves", "4")?,
             util::input_opt("Persistence", "0.5")?,
             util::input_opt("Lacunarity", "2.0")?,
-        )),
+        )) } else {
+            Box::new(algo::perlin::Perlin::new(
+                size,
+                rand_thr,
+                None,
+                None,
+                None
+            ))
+        },
         _ => unreachable!()
     };
 
