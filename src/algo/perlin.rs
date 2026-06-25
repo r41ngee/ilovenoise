@@ -1,17 +1,15 @@
-use std::{ops::{Index, IndexMut}, range::Range};
+use std::ops::{Index, IndexMut};
 
 use rand::RngExt;
 use rand_chacha::ChaCha8Rng;
 
 pub struct Perlin {
     rng_thr: ChaCha8Rng,
-
     octaves: u32,
     persistence: f32,
     lacunarity: f64,
-
     size: (u32, u32),
-    frequency: u32
+    frequency: u32,
 }
 
 impl Perlin {
@@ -32,81 +30,121 @@ impl Perlin {
             octaves: octaves.unwrap_or(DEF_OCTAVES),
             persistence: persistence.unwrap_or(DEF_PERSISTENCE),
             lacunarity: lacunarity.unwrap_or(DEF_LACUNARITY),
-            frequency: 8
+            frequency: 8,
         }
     }
 }
 
 impl super::Aglorithm for Perlin {
     fn draw(&mut self, image: &mut crate::image::Image) {
-        let lattice = Lattice::generate((image.width as usize, image.height as usize), self.frequency, &mut self.rng_thr);
-        
+        let grid_w = (self.size.0 / self.frequency + 1) as usize;
+        let grid_h = (self.size.1 / self.frequency + 1) as usize;
+        let lattice = Lattice::generate((grid_w, grid_h), &mut self.rng_thr);
 
-        todo!();
+        for py in 0..self.size.1 {
+            for px in 0..self.size.0 {
+                let mut value = 0.0f32;
+                let mut amplitude = 1.0f32;
+                let mut freq = 1.0f64;
+                let mut max_value = 0.0f32;
+
+                for _ in 0..self.octaves {
+                    let fx = px as f64 / self.frequency as f64 * freq;
+                    let fy = py as f64 / self.frequency as f64 * freq;
+
+                    let i = fx.floor() as i64;
+                    let j = fy.floor() as i64;
+                    let u = fx - i as f64;
+                    let v = fy - j as f64;
+
+                    let su = u * u * (3.0 - 2.0 * u);
+                    let sv = v * v * (3.0 - 2.0 * v);
+
+                    let g00 = lattice.get_wrapped(i, j);
+                    let g10 = lattice.get_wrapped(i + 1, j);
+                    let g01 = lattice.get_wrapped(i, j + 1);
+                    let g11 = lattice.get_wrapped(i + 1, j + 1);
+
+                    let n00 = g00.x * u as f32 + g00.y * v as f32;
+                    let n10 = g10.x * (u - 1.0) as f32 + g10.y * v as f32;
+                    let n01 = g01.x * u as f32 + g01.y * (v - 1.0) as f32;
+                    let n11 = g11.x * (u - 1.0) as f32 + g11.y * (v - 1.0) as f32;
+
+                    let top = n00 + (n10 - n00) * su as f32;
+                    let bot = n01 + (n11 - n01) * su as f32;
+                    let octave_val = top + (bot - top) * sv as f32;
+
+                    value += octave_val * amplitude;
+                    max_value += amplitude;
+                    amplitude *= self.persistence;
+                    freq *= self.lacunarity;
+                }
+
+                let n = ((value / max_value + 1.0) * 0.5 * 255.0) as u8;
+                image[(px, py)] = crate::util::Rgba::new(n, n, n, Some(255));
+            }
+        }
     }
 }
 
 #[derive(Debug, Clone)]
 struct Lattice {
     data: Vec<Vector>,
-    size: (u32, u32),
-    frequency: u32
+    size: (usize, usize),
 }
 
 impl Index<(usize, usize)> for Lattice {
     type Output = Vector;
-    fn index(&self, index: (usize, usize)) -> &Self::Output {
-        &self.data[index.1 * self.size.0 as usize + index.0]
+    fn index(&self, (x, y): (usize, usize)) -> &Self::Output {
+        &self.data[y * self.size.0 + x]
     }
 }
 
 impl IndexMut<(usize, usize)> for Lattice {
-    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
-        &mut self.data[index.1 * self.size.0 as usize + index.0]
+    fn index_mut(&mut self, (x, y): (usize, usize)) -> &mut Self::Output {
+        &mut self.data[y * self.size.0 + x]
     }
 }
 
 impl Lattice {
-    fn new(size: (usize, usize), frequency: u32) -> Self {
+    fn new(size: (usize, usize)) -> Self {
         Self {
-            size: (size.0 as u32, size.1 as u32),
-            data: vec![Vector::default(); (size.0 / frequency as usize) * (size.1 / frequency as usize)],
-            frequency,
+            size,
+            data: vec![Vector::default(); size.0 * size.1],
         }
     }
 
-    pub fn generate(size: (usize, usize), frequency: u32, rand_thr:&mut ChaCha8Rng ) -> Self {
-        let mut lattice = Self::new(size, frequency);
-        for vector in &mut lattice.data {
-            vector.randomize(rand_thr);
+    fn generate(size: (usize, usize), rng: &mut ChaCha8Rng) -> Self {
+        let mut lattice = Self::new(size);
+        for v in &mut lattice.data {
+            v.randomize(rng);
         }
-
         lattice
     }
 
-    // pub fn point_range(&self, coord: (usize, usize)) -> Range<usize> {
-        
-    // }
+    fn get_wrapped(&self, x: i64, y: i64) -> &Vector {
+        let mx = x.rem_euclid(self.size.0 as i64) as usize;
+        let my = y.rem_euclid(self.size.1 as i64) as usize;
+        &self.data[my * self.size.0 + mx]
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
 struct Vector {
     x: f32,
-    y: f32
+    y: f32,
 }
 
 impl Default for Vector {
     fn default() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0
-        }
+        Self { x: 0.0, y: 0.0 }
     }
 }
 
 impl Vector {
-    pub fn randomize(&mut self, rand_thr: &mut ChaCha8Rng) {
-        self.x = rand_thr.random_range(-1.0..1.0);
-        self.y = rand_thr.random_range(-1.0..1.0);
+    fn randomize(&mut self, rng: &mut ChaCha8Rng) {
+        let angle: f32 = rng.random_range(0.0..std::f32::consts::PI * 2.0);
+        self.x = angle.cos();
+        self.y = angle.sin();
     }
 }
