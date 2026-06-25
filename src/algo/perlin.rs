@@ -153,16 +153,15 @@ impl Vector {
 mod tests {
     use std::ops::Range;
 
-use rand::SeedableRng;
     use super::*;
     use crate::algo::Aglorithm;
+    use rand::SeedableRng;
 
     const DEFAULT_SEED: u64 = 42u64;
     const DEFAULT_SIZE: (u32, u32) = (16, 16);
 
     fn in_range<T: PartialOrd>(val: T, range: Range<T>) -> bool {
-        val <= range.end &&
-        val >= range.start
+        val <= range.end && val >= range.start
     }
 
     #[test]
@@ -175,16 +174,17 @@ use rand::SeedableRng;
 
         for p in image.pixels {
             assert!(
-                in_range(p.r, 0u8..255u8) &&
-                in_range(p.g, 0u8..255u8) && 
-                in_range(p.b, 0u8..255u8)
+                in_range(p.r, 0u8..255u8) && in_range(p.g, 0u8..255u8) && in_range(p.b, 0u8..255u8)
             )
         }
     }
 
     #[test]
     fn perlin_determined() {
-        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        let mut result: [crate::image::Image; 2] = [
+            crate::image::Image::new(DEFAULT_SIZE),
+            crate::image::Image::new(DEFAULT_SIZE),
+        ];
         {
             let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
             let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(2), None, None);
@@ -203,15 +203,15 @@ use rand::SeedableRng;
     #[test]
     fn lattice_wrapping() {
         let lattice = Lattice::new(DEFAULT_SIZE);
-        assert_eq!(
-            *lattice.get_wrapped(0, 0),
-            *lattice.get_wrapped(4, 4),
-        );
+        assert_eq!(*lattice.get_wrapped(0, 0), *lattice.get_wrapped(4, 4),);
     }
 
     #[test]
     fn octaves_influence() {
-        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        let mut result: [crate::image::Image; 2] = [
+            crate::image::Image::new(DEFAULT_SIZE),
+            crate::image::Image::new(DEFAULT_SIZE),
+        ];
         {
             let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
             let mut perlin = Perlin::new(DEFAULT_SIZE, rng, Some(1), None, None);
@@ -229,7 +229,10 @@ use rand::SeedableRng;
 
     #[test]
     fn persistence_influence() {
-        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        let mut result: [crate::image::Image; 2] = [
+            crate::image::Image::new(DEFAULT_SIZE),
+            crate::image::Image::new(DEFAULT_SIZE),
+        ];
         {
             let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
             let mut perlin = Perlin::new(DEFAULT_SIZE, rng, None, Some(0.5), None);
@@ -247,7 +250,10 @@ use rand::SeedableRng;
 
     #[test]
     fn lacunarity_influence() {
-        let mut result: [crate::image::Image; 2] = [crate::image::Image::new(DEFAULT_SIZE), crate::image::Image::new(DEFAULT_SIZE)];
+        let mut result: [crate::image::Image; 2] = [
+            crate::image::Image::new(DEFAULT_SIZE),
+            crate::image::Image::new(DEFAULT_SIZE),
+        ];
         {
             let rng = ChaCha8Rng::seed_from_u64(DEFAULT_SEED);
             let mut perlin = Perlin::new(DEFAULT_SIZE, rng, None, None, Some(1.0));

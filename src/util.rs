@@ -20,12 +20,7 @@ impl Rgba {
     }
 
     pub fn new(r: u8, g: u8, b: u8, a: Option<u8>) -> Self {
-        Self {
-            r,
-            g,
-            b,
-            a
-        }
+        Self { r, g, b, a }
     }
 }
 
@@ -36,5 +31,9 @@ pub fn input_opt<T: FromStr>(prompt: &str, default: &str) -> Result<Option<T>, T
         .default(default.into())
         .interact_text()
         .expect("Failed to read input");
-    if s.is_empty() { Ok(None) } else { s.parse().map(Some) }
+    if s.is_empty() {
+        Ok(None)
+    } else {
+        s.parse().map(Some)
+    }
 }

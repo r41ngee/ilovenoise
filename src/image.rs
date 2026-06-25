@@ -3,20 +3,20 @@ use std::ops::{Index, IndexMut};
 #[derive(Debug, Clone)]
 pub struct Image {
     pub size: (u32, u32),
-    pub pixels: Vec<crate::util::Rgba>
+    pub pixels: Vec<crate::util::Rgba>,
 }
 
 impl Image {
     pub fn new(size: (u32, u32)) -> Self {
         Self {
             size,
-            pixels: vec![crate::util::Rgba::new(0, 0, 0, None); (size.0 * size.1) as usize]
+            pixels: vec![crate::util::Rgba::new(0, 0, 0, None); (size.0 * size.1) as usize],
         }
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
         let mut data = vec![0; self.size.0 as usize * self.size.1 as usize * 4];
-        
+
         #[allow(clippy::useless_conversion)]
         for (index, pixel) in data.chunks_mut(4).into_iter().enumerate() {
             pixel[0] = self.pixels[index].r;

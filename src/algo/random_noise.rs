@@ -1,16 +1,14 @@
+use super::Aglorithm;
 use rand::RngExt;
 use rand_chacha::ChaCha8Rng;
-use super::Aglorithm;
 
 pub struct RandomNoise {
-    rng_thr: ChaCha8Rng
+    rng_thr: ChaCha8Rng,
 }
 
 impl RandomNoise {
     pub fn new(rng_thr: ChaCha8Rng) -> Self {
-        Self {
-            rng_thr
-        }
+        Self { rng_thr }
     }
 }
 
