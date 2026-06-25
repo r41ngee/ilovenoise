@@ -16,6 +16,9 @@ mod algo;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let argparser = cli::Cli::parse();
     let (width, height) = (argparser.width, argparser.height);
+    if width % 8 != 0 || height % 8 != 0 {
+        return Err("Width and height must be multiples of 8".into());
+    }
 
     let mut image = image::Image::new(width, height);
     let rand_thr = ChaCha8Rng::seed_from_u64(
