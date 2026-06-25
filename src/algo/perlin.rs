@@ -262,4 +262,13 @@ use rand::SeedableRng;
 
         assert_ne!(result[0].pixels, result[1].pixels);
     }
+
+    #[test]
+    fn perlin_snapshot() {
+        let rng = ChaCha8Rng::seed_from_u64(42);
+        let mut perlin = Perlin::new((8, 8), rng, Some(2), None, None);
+        let mut image = crate::image::Image::new(DEFAULT_SIZE);
+        perlin.draw(&mut image);
+        insta::assert_debug_snapshot!(image.pixels);
+    }
 }

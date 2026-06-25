@@ -77,4 +77,13 @@ mod tests {
 
         assert_eq!(result[0].pixels, result[1].pixels);
     }
+
+    #[test]
+    fn random_snapshot() {
+        let rng = ChaCha8Rng::seed_from_u64(42);
+        let mut randnoise = RandomNoise::new(rng);
+        let mut image = crate::image::Image::new(DEFAULT_SIZE);
+        randnoise.draw(&mut image);
+        insta::assert_debug_snapshot!(image.pixels);
+    }
 }
