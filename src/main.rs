@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut image = image::Image::new(size);
     let rand_thr = ChaCha8Rng::seed_from_u64(argparser.seed.unwrap_or_else(rand::random));
 
-    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, size, argparser.defaults)?;
+    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, size, &argparser)?;
 
     algorithm.draw(&mut image);
 
@@ -48,18 +48,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn create_mode(
     rand_thr: ChaCha8Rng,
     size: (u32, u32),
-    use_defaults: bool,
+    args: &crate::cli::Cli,
 ) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
-    let algorithms = &["Random", "Perlin"];
-    let selection = dialoguer::Select::new()
-        .with_prompt("Choose your algorithm")
-        .items(algorithms)
-        .interact()?;
+    let selection: usize = if let Some(algo) = &args.algo {
+        match algo.to_lowercase().as_str() {
+            "random" => 0,
+            "perlin" => 1,
+            _ => return Err(format!("unknown algorithm: {algo}. Use random or perlin").into()),
+        }
+    } else {
+        let algorithms = &["Random", "Perlin"];
+        dialoguer::Select::new()
+            .with_prompt("Choose your algorithm")
+            .items(algorithms)
+            .interact()?
+    };
 
     let box_: Box<dyn Aglorithm> = match selection {
         0 => Box::new(algo::random_noise::RandomNoise::new(rand_thr)),
         1 => {
-            if !use_defaults {
+            if !args.defaults {
                 Box::new(algo::perlin::Perlin::new(
                     size,
                     rand_thr,
