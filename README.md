@@ -15,6 +15,7 @@ ilovenoise [-w 512] [-h 512] [-s <seed>] [-o output.png] [-d]
 | `-s` | Random seed (omit for random) | random |
 | `-o` | Output path | `output.png` |
 | `-d` | Automatical default settings usage |
+| `-a` | Algorithm choice | None (menu starts) |
 
 After launching, an interactive menu asks for:
 - **Algorithm**: `Random` (white noise) or `Perlin`
