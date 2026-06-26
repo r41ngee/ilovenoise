@@ -2,6 +2,9 @@ use super::Aglorithm;
 use rand::RngExt;
 use rand_chacha::ChaCha8Rng;
 
+use rayon::prelude::*;
+use rand::SeedableRng;
+
 pub struct RandomNoise {
     rng_thr: ChaCha8Rng,
 }
@@ -14,12 +17,22 @@ impl RandomNoise {
 
 impl Aglorithm for RandomNoise {
     fn draw(&mut self, image: &mut crate::image::Image) {
-        for pixel in &mut image.pixels {
-            let multiplier = (self.rng_thr.random_range(0f32..1f32) * 255f32) as u8;
-            let (r, g, b) = (multiplier, multiplier, multiplier);
-            let a = Some(255);
-            *pixel = crate::util::Rgba::new(r, g, b, a);
-        }
+        let w = image.size.0 as usize;
+        let seed: u64 = self.rng_thr.random_range(u64::MIN..=u64::MAX);
+
+
+        image.pixels
+        .par_chunks_mut(w)
+        .enumerate()
+        .for_each(|(py, row)| {
+            let mut row_rng = ChaCha8Rng::seed_from_u64(
+                seed ^ (py as u64).wrapping_mul(0x9e3779b97f4a7c15)
+            );
+            for pixel in row.iter_mut() {
+                let val = (row_rng.random_range(0f32..1f32) * 255f32) as u8;
+                *pixel = crate::util::Rgba::new(val, val, val, Some(255));
+            }
+        });
     }
 }
 
