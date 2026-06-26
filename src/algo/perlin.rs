@@ -2,6 +2,7 @@ use std::ops::{Index, IndexMut};
 
 use rand::RngExt;
 use rand_chacha::ChaCha8Rng;
+use rayon::prelude::*;
 
 pub struct Perlin {
     rng_thr: ChaCha8Rng,
@@ -41,51 +42,62 @@ impl super::Aglorithm for Perlin {
         let grid_h = self.size.1 / self.frequency + 1;
         let lattice = Lattice::generate((grid_w, grid_h), &mut self.rng_thr);
 
-        for py in 0..self.size.1 {
-            for px in 0..self.size.0 {
-                let mut value = 0.0f32;
-                let mut amplitude = 1.0f32;
-                let mut freq = 1.0f64;
-                let mut max_value = 0.0f32;
+        let octaves = self.octaves;
+        let frequency = self.frequency;
+        let persistence = self.persistence;
+        let lacunarity = self.lacunarity;
 
-                for _ in 0..self.octaves {
-                    let fx = px as f64 / self.frequency as f64 * freq;
-                    let fy = py as f64 / self.frequency as f64 * freq;
+        let w = image.size.0 as usize;
 
-                    let i = fx.floor() as i64;
-                    let j = fy.floor() as i64;
-                    let u = fx - i as f64;
-                    let v = fy - j as f64;
+        image.pixels
+            .par_chunks_mut(w)
+            .enumerate()
+            .for_each(|(py, row)| {
+                for (px, pixel) in row.iter_mut().enumerate() {
+                    let mut value = 0.0f32;
+                    let mut amplitude = 1.0f32;
+                    let mut freq = 1.0f64;
+                    let mut max_value = 0.0f32;
 
-                    let su = u * u * (3.0 - 2.0 * u);
-                    let sv = v * v * (3.0 - 2.0 * v);
+                    for _ in 0..octaves {
+                        let fx = px as f64 / frequency as f64 * freq;
+                        let fy = py as f64 / frequency as f64 * freq;
 
-                    let g00 = lattice.get_wrapped(i, j);
-                    let g10 = lattice.get_wrapped(i + 1, j);
-                    let g01 = lattice.get_wrapped(i, j + 1);
-                    let g11 = lattice.get_wrapped(i + 1, j + 1);
+                        let i = fx.floor() as i64;
+                        let j = fy.floor() as i64;
+                        let u = fx - i as f64;
+                        let v = fy - j as f64;
 
-                    let n00 = g00.x * u as f32 + g00.y * v as f32;
-                    let n10 = g10.x * (u - 1.0) as f32 + g10.y * v as f32;
-                    let n01 = g01.x * u as f32 + g01.y * (v - 1.0) as f32;
-                    let n11 = g11.x * (u - 1.0) as f32 + g11.y * (v - 1.0) as f32;
+                        let su = u * u * (3.0 - 2.0 * u);
+                        let sv = v * v * (3.0 - 2.0 * v);
 
-                    let top = n00 + (n10 - n00) * su as f32;
-                    let bot = n01 + (n11 - n01) * su as f32;
-                    let octave_val = top + (bot - top) * sv as f32;
+                        let g00 = lattice.get_wrapped(i, j);
+                        let g10 = lattice.get_wrapped(i + 1, j);
+                        let g01 = lattice.get_wrapped(i, j + 1);
+                        let g11 = lattice.get_wrapped(i + 1, j + 1);
 
-                    value += octave_val * amplitude;
-                    max_value += amplitude;
-                    amplitude *= self.persistence;
-                    freq *= self.lacunarity;
+                        let n00 = g00.x * u as f32 + g00.y * v as f32;
+                        let n10 = g10.x * (u - 1.0) as f32 + g10.y * v as f32;
+                        let n01 = g01.x * u as f32 + g01.y * (v - 1.0) as f32;
+                        let n11 = g11.x * (u - 1.0) as f32 + g11.y * (v - 1.0) as f32;
+
+                        let top = n00 + (n10 - n00) * su as f32;
+                        let bot = n01 + (n11 - n01) * su as f32;
+                        let octave_val = top + (bot - top) * sv as f32;
+
+                        value += octave_val * amplitude;
+                        max_value += amplitude;
+                        amplitude *= persistence;
+                        freq *= lacunarity;
+                    }
+
+                    let n = ((value / max_value + 1.0) * 0.5 * 255.0) as u8;
+                    *pixel = crate::util::Rgba::new(n, n, n, Some(255));
                 }
-
-                let n = ((value / max_value + 1.0) * 0.5 * 255.0) as u8;
-                image[(px, py)] = crate::util::Rgba::new(n, n, n, Some(255));
-            }
-        }
+            });
     }
 }
+
 
 #[derive(Debug, Clone)]
 struct Lattice {
