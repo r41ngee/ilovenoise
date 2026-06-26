@@ -7,6 +7,12 @@ license = "MIT"
 repository = "https://github.com/r41ngee/ilovenoise"
 readme="README.md"
 
+[package.metadata.wix]
+upgrade-guid = "9C79645E-2765-4053-8AB3-FEB0BF2510AA"
+path-guid = "210F4AA9-E8D5-44E6-B119-13D01C4B62D6"
+license = false
+eula = false
+
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
 dialoguer = "0.12.0"
