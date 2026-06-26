@@ -19,4 +19,7 @@ pub struct Cli {
 
     #[arg(long, short)]
     pub output_path: Option<String>,
+
+    #[arg(long, short, help = "algorithm: random or perlin")]
+    pub algo: Option<String>,
 }
