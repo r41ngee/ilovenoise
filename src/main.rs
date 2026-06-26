@@ -54,10 +54,10 @@ fn create_mode(
         match algo.to_lowercase().as_str() {
             "random" => 0,
             "perlin" => 1,
-            _ => return Err(format!("unknown algorithm: {algo}. Use random or perlin").into()),
+            _ => return Err(format!("unknown algorithm: {}. Use some of: {:?}", algo, algo::ALGORITHMS).into()),
         }
     } else {
-        let algorithms = &["Random", "Perlin"];
+        let algorithms = algo::ALGORITHMS;
         dialoguer::Select::new()
             .with_prompt("Choose your algorithm")
             .items(algorithms)
