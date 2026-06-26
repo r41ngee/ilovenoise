@@ -40,3 +40,4 @@ ilovenoise -w 512 -h 512
 - `dialoguer` — interactive prompts
 - `png` — PNG encoding
 - `rand` / `rand_chacha` — deterministic RNG
+- `rayon` — multiprocessing
