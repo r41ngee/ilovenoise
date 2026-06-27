@@ -19,4 +19,7 @@ pub struct Cli {
 
     #[arg(long, short)]
     pub output_path: Option<String>,
+
+    #[arg(long, short, help = format!("algorithms: {:?}", crate::algo::ALGORITHMS))]
+    pub algo: Option<String>,
 }
