@@ -22,4 +22,6 @@ pub struct Cli {
 
     #[arg(long, short, help = format!("algorithms: {:?}", crate::algo::ALGORITHMS))]
     pub algo: Option<String>,
+    #[arg(long, short)]
+    pub task_file: Option<String>
 }
