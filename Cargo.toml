@@ -15,11 +15,13 @@ eula = false
 
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
-dialoguer = "0.12.0"
+clap_complete = "4"
 png = "0.18.1"
 rand = "0.10.1"
 rand_chacha = "0.10.0"
 rayon = "1.12.0"
+serde = { version = "1.0.228", features = ["derive"] }
+toml = "1.1.2"
 
 [dev-dependencies]
 insta = "1.48.0"
@@ -29,3 +31,7 @@ inherits = "release"
 lto = true
 codegen-units = 1
 strip = true
+
+[build-dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+clap_complete = "4"
