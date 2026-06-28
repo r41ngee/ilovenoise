@@ -7,32 +7,78 @@ use std::io::BufWriter;
 use std::path::Path;
 
 use crate::algo::Aglorithm;
+use crate::image::Image;
 
 mod algo;
 mod cli;
 mod image;
+mod tasking;
 mod util;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let argparser = cli::Cli::parse();
-    let size = (argparser.width, argparser.height);
+    let args = cli::Cli::parse();
+
+    if let Some(shell) = args.completions {
+        use clap::CommandFactory;
+        let mut cmd = cli::Cli::command();
+        clap_complete::generate(shell, &mut cmd, env!("CARGO_PKG_NAME"), &mut std::io::stdout());
+        return Ok(());
+    }
+
+    if let Some(taskfile) = &args.task_file {
+        let tasks = tasking::load_tasks(taskfile)?;
+        for task in tasks {
+            task.run()?;
+        }
+        return Ok(());
+    }
+
+    let config = tasking::TaskConfig::from_args(&args);
+
+    let size = (config.width, config.height);
     if size.0 % 8 != 0 || size.1 % 8 != 0 {
         return Err("Width and height must be multiples of 8".into());
     }
+    let rand_thr = ChaCha8Rng::seed_from_u64(config.seed.unwrap_or_else(rand::random));
 
-    let mut image = image::Image::new(size);
-    let rand_thr = ChaCha8Rng::seed_from_u64(argparser.seed.unwrap_or_else(rand::random));
-
-    let mut algorithm: Box<dyn Aglorithm> = create_mode(rand_thr, size, argparser.defaults)?;
-
+    let mut image = Image::new(size);
+    let mut algorithm = create_mode(rand_thr, size, &config)?;
     algorithm.draw(&mut image);
 
-    let savepath_name = argparser.output_path.unwrap_or("output.png".to_string());
-    let path = Path::new(&savepath_name);
+    let default_path = "output.png".to_string();
+    save_image(&image, &config.output.unwrap_or(default_path))?;
+
+    Ok(())
+}
+
+fn create_mode(
+    rand_thr: ChaCha8Rng,
+    size: (u32, u32),
+    config: &tasking::TaskConfig,
+) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
+    match config.mode.to_lowercase().as_str() {
+        "random" => Ok(Box::new(algo::random_noise::RandomNoise::new(rand_thr))),
+        "perlin" => {
+            let p = &config.perlin;
+            Ok(Box::new(algo::perlin::Perlin::new(
+                size,
+                rand_thr,
+                p.as_ref().and_then(|c| c.octaves),
+                p.as_ref().and_then(|c| c.persistence),
+                p.as_ref().and_then(|c| c.lacunarity),
+            )))
+        }
+        _ => Err(format!("unknown algorithm: {}. Use some of: {:?}", config.mode, algo::ALGORITHMS).into()),
+    }
+}
+
+pub(crate)
+fn save_image(image: &Image, filepath: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let path = Path::new(&filepath);
     let file = File::create(path)?;
     let w = &mut BufWriter::new(file);
 
-    let mut encoder = png::Encoder::new(w, size.0, size.1);
+    let mut encoder = png::Encoder::new(w, image.size.0, image.size.1);
     encoder.set_color(png::ColorType::Rgba);
     encoder.set_depth(png::BitDepth::Eight);
 
@@ -41,38 +87,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     writer.write_image_data(&image_data)?;
     writer.finish()?;
-
     Ok(())
-}
-
-fn create_mode(
-    rand_thr: ChaCha8Rng,
-    size: (u32, u32),
-    use_defaults: bool,
-) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
-    let algorithms = &["Random", "Perlin"];
-    let selection = dialoguer::Select::new()
-        .with_prompt("Choose your algorithm")
-        .items(algorithms)
-        .interact()?;
-
-    let box_: Box<dyn Aglorithm> = match selection {
-        0 => Box::new(algo::random_noise::RandomNoise::new(rand_thr)),
-        1 => {
-            if !use_defaults {
-                Box::new(algo::perlin::Perlin::new(
-                    size,
-                    rand_thr,
-                    util::input_opt("Octaves", "4")?,
-                    util::input_opt("Persistence", "0.5")?,
-                    util::input_opt("Lacunarity", "2.0")?,
-                ))
-            } else {
-                Box::new(algo::perlin::Perlin::new(size, rand_thr, None, None, None))
-            }
-        }
-        _ => unreachable!(),
-    };
-
-    Ok(box_)
 }
