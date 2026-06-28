@@ -30,8 +30,8 @@ impl TaskConfig {
     pub fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
         let size = (self.width, self.height);
 
-        let rand_thr = ChaCha8Rng::seed_from_u64(self.seed.unwrap_or_else(||rand::random()));
-        let mut algorithm = crate::create_mode(rand_thr, size, &self)?;
+        let rand_thr = ChaCha8Rng::seed_from_u64(self.seed.unwrap_or_else(rand::random));
+        let mut algorithm = crate::create_mode(rand_thr, size, self)?;
         let mut image = crate::image::Image::new(size);
 
         algorithm.draw(&mut image);
@@ -46,7 +46,7 @@ impl TaskConfig {
             height: args.height,
             output: args.output_path.clone(),
             seed: args.seed,
-            perlin: (args.algo.as_deref() == Some("perlin")).then(|| PerlinConfig {
+            perlin: (args.algo.as_deref() == Some("perlin")).then_some(PerlinConfig {
                 octaves: args.octaves,
                 persistence: args.persistence,
                 lacunarity: args.lacunarity,

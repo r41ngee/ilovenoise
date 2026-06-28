@@ -36,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = tasking::TaskConfig::from_args(&args);
 
     let size = (config.width, config.height);
-    if size.0 % 8 != 0 || size.1 % 8 != 0 {
+    if !size.0.is_multiple_of(8) || !size.1.is_multiple_of(8) {
         return Err("Width and height must be multiples of 8".into());
     }
     let rand_thr = ChaCha8Rng::seed_from_u64(config.seed.unwrap_or_else(rand::random));
