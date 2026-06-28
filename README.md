@@ -5,40 +5,69 @@ CLI tool to generate PNG images with procedural noise. Supports Perlin noise wit
 ## Usage
 
 ```
-ilovenoise [-w 512] [-h 512] [-s <seed>] [-o output.png] [-d]
+ilovenoise --algo <mode> [options]
+ilovenoise --task-file <path>
+ilovenoise --completions <shell>
 ```
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `-w` | Image width (must be multiple of 8) | `256` |
-| `-h` | Image height (must be multiple of 8) | `256` |
-| `-s` | Random seed (omit for random) | random |
-| `-o` | Output path | `output.png` |
-| `-d` | Automatical default settings usage |
-| `-a` | Algorithm choice | None (menu starts) |
+| `-w` / `--width` | Image width (multiple of 8) | `256` |
+| `-h` / `--height` | Image height (multiple of 8) | `256` |
+| `-s` / `--seed` | Random seed | random |
+| `-o` / `--output` | Output path | `output.png` |
+| `-a` / `--algo` | Algorithm: `random` or `perlin` | required |
+| `-t` / `--task-file` | TOML task file for batch processing | — |
+| `--octaves` | fBM octaves (Perlin only) | `4` |
+| `--persistence` | Amplitude multiplier per octave | `0.5` |
+| `--lacunarity` | Frequency multiplier per octave | `2.0` |
+| `--completions` | Generate shell completions | — |
 
-After launching, an interactive menu asks for:
-- **Algorithm**: `Random` (white noise) or `Perlin`
-- **Perlin parameters** (if selected):
-  - `Octaves` — number of fBM octaves (default: `4`)
-  - `Persistence` — amplitude multiplier per octave (default: `0.5`)
-  - `Lacunarity` — frequency multiplier per octave (default: `2.0`)
-
-Press Enter or use `-d` flag to accept defaults.
-
-## Example
+## Examples
 
 ```sh
-ilovenoise -w 512 -h 512
-# Select "Perlin"
-# Press Enter for all defaults
-# → output.png with 4-octave Perlin noise
+# Perlin noise with custom params
+ilovenoise --algo perlin -w 512 -h 512 --octaves 6 --persistence 0.3
+
+# Random noise with a seed
+ilovenoise --algo random -s 42 -o random.png
+
+# Batch from TOML file
+ilovenoise --task-file tasks.toml
+
+# Generate shell completions
+ilovenoise --completions zsh > ~/.zsh/completions/_ilovenoise
+```
+
+## Shell Completions
+
+Supported shells: `bash`, `zsh`, `fish`, `powershell`, `elvish`.
+
+## TOML Task File
+
+```toml
+[[task]]
+mode = "Perlin"
+width = 512
+height = 512
+seed = 42
+
+[task.perlin]
+octaves = 6
+persistence = 0.3
+lacunarity = 2.5
+
+[[task]]
+mode = "Random"
+width = 256
+height = 256
+output = "random.png"
 ```
 
 ## Dependencies
 
-- `clap` — CLI argument parsing
-- `dialoguer` — interactive prompts
+- `clap` / `clap_complete` — CLI argument parsing and completions
 - `png` — PNG encoding
 - `rand` / `rand_chacha` — deterministic RNG
 - `rayon` — multiprocessing
+- `serde` / `toml` — task file deserialization
