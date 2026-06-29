@@ -1,0 +1,33 @@
+[[task]]
+mode = "Random"
+width = 64
+height = 64
+seed = 42
+
+[[task]]
+mode = "Random"
+width = 256
+height = 256
+seed = 42
+
+[[task]]
+mode = "Perlin"
+width = 256
+height = 256
+seed = 42
+
+[task.perlin]
+octaves = 4
+persistence = 0.5
+lacunarity = 2.0
+
+[[task]]
+mode = "Perlin"
+width = 512
+height = 512
+seed = 123
+
+[task.perlin]
+octaves = 8
+persistence = 0.3
+lacunarity = 2.5

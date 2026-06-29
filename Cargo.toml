@@ -24,7 +24,12 @@ serde = { version = "1.0.228", features = ["derive"] }
 toml = "1.1.2"
 
 [dev-dependencies]
+criterion = { version = "0.8.2", features = ["html_reports"] }
 insta = "1.48.0"
+
+[[bench]]
+name = "noise"
+harness = false
 
 [profile.dist]
 inherits = "release"
