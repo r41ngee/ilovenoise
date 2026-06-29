@@ -9,7 +9,7 @@ struct TasksConfig {
     pub task: Vec<TaskConfig>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct TaskConfig {
     pub mode: String,
     pub width: u32,
@@ -19,7 +19,7 @@ pub struct TaskConfig {
     pub perlin: Option<PerlinConfig>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PerlinConfig {
     pub octaves: Option<u32>,
     pub persistence: Option<f32>,
