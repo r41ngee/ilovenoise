@@ -1,7 +1,9 @@
 /target
+*/target
+
 .unwrap.rs
 output.png
 
 session
 
-/src/*/snapshots/*.new
+**/snapshots/*.new
