@@ -434,9 +434,18 @@ version = "0.4.0"
 dependencies = [
  "clap",
  "clap_complete",
+ "ilovenoise-core",
+ "png",
+ "rand",
+ "rand_chacha",
+]
+
+[[package]]
+name = "ilovenoise-core"
+version = "0.1.0"
+dependencies = [
  "criterion",
  "insta",
- "png",
  "rand",
  "rand_chacha",
  "rayon",
