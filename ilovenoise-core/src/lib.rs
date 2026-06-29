@@ -1,17 +1,16 @@
 pub mod algo;
-pub mod cli;
 pub mod image;
-pub mod tasking;
 pub mod util;
+
+#[cfg(feature = "tasking")]
+pub mod tasking;
 
 pub use algo::Aglorithm;
 
+#[cfg(feature = "tasking")]
 use rand_chacha::ChaCha8Rng;
 
-use std::fs::File;
-use std::io::BufWriter;
-use std::path::Path;
-
+#[cfg(feature = "tasking")]
 pub fn create_mode(
     rand_thr: ChaCha8Rng,
     size: (u32, u32),
@@ -36,21 +35,4 @@ pub fn create_mode(
         )
         .into()),
     }
-}
-
-pub fn save_image(image: &image::Image, filepath: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let path = Path::new(&filepath);
-    let file = File::create(path)?;
-    let w = &mut BufWriter::new(file);
-
-    let mut encoder = png::Encoder::new(w, image.size.0, image.size.1);
-    encoder.set_color(png::ColorType::Rgba);
-    encoder.set_depth(png::BitDepth::Eight);
-
-    let mut writer = encoder.write_header()?;
-    let image_data = image.as_bytes();
-
-    writer.write_image_data(&image_data)?;
-    writer.finish()?;
-    Ok(())
 }

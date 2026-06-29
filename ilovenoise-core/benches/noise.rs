@@ -1,8 +1,9 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use ilovenoise::{
+use ilovenoise_core::{
     algo::{self, Aglorithm},
     image::Image,
     tasking::{self, TaskConfig},
+    create_mode,
 };
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
@@ -61,17 +62,40 @@ fn bench_task_file(c: &mut Criterion) {
     for task in &tasks {
         let label = format!("{}_{}x{}", task.mode, task.width, task.height);
         let out = out.clone();
-        group.bench_with_input(label, &(), |b, _| {
+        let size = (task.width, task.height);
+        group.bench_with_input(label, &(task, size, out), |b, &(t, s, ref out_path)| {
             b.iter(|| {
-                let t = TaskConfig {
-                    output: Some(out.clone()),
-                    ..task.clone()
+                let config = TaskConfig {
+                    output: Some(out_path.clone()),
+                    ..t.clone()
                 };
-                t.run().unwrap();
+                let rng = ChaCha8Rng::seed_from_u64(config.seed.unwrap_or(0));
+                let mut algo = create_mode(rng, s, &config).unwrap();
+                let mut image = Image::new(s);
+                algo.draw(&mut image);
+                save_bench_image(&image, config.output.as_deref().unwrap_or("output.png"));
             });
         });
     }
     group.finish();
+}
+
+fn save_bench_image(image: &Image, filepath: &str) {
+    use std::fs::File;
+    use std::io::BufWriter;
+    use std::path::Path;
+
+    let path = Path::new(filepath);
+    let file = File::create(path).unwrap();
+    let w = &mut BufWriter::new(file);
+
+    let mut encoder = png::Encoder::new(w, image.size.0, image.size.1);
+    encoder.set_color(png::ColorType::Rgba);
+    encoder.set_depth(png::BitDepth::Eight);
+    let mut writer = encoder.write_header().unwrap();
+    let image_data = image.as_bytes();
+    writer.write_image_data(&image_data).unwrap();
+    writer.finish().unwrap();
 }
 
 criterion_group!(benches, bench_random_noise, bench_perlin, bench_task_file);
