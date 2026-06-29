@@ -1,0 +1,48 @@
+#
+# ilovenoise — example TOML task file
+#
+# Run: ilovenoise --task-file example-tasks/simple.toml
+#
+
+[[task]]
+mode = "Perlin"
+width = 256
+height = 256
+output = "perlin_256.png"
+seed = 42
+
+[task.perlin]
+octaves = 4
+persistence = 0.5
+lacunarity = 2.0
+
+[[task]]
+mode = "Perlin"
+width = 512
+height = 512
+output = "perlin_fbm.png"
+seed = 123
+
+[task.perlin]
+octaves = 8
+persistence = 0.3
+lacunarity = 2.5
+
+[[task]]
+mode = "Random"
+width = 256
+height = 256
+output = "random.png"
+seed = 77
+
+[[task]]
+mode = "Perlin"
+width = 128
+height = 128
+output = "perlin_defaults.png"
+
+[[task]]
+mode = "Random"
+width = 64
+height = 64
+output = "tiny_random.png"

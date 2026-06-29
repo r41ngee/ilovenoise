@@ -20,7 +20,6 @@ impl Aglorithm for RandomNoise {
         let w = image.size.0 as usize;
         let seed: u64 = self.rng_thr.random_range(u64::MIN..=u64::MAX);
 
-
         image.pixels
         .par_chunks_mut(w)
         .enumerate()

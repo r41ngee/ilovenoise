@@ -1,11 +1,14 @@
+[workspace]
+members = ["ilovenoise-core"]
+
 [package]
 name = "ilovenoise"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2024"
 description = "Simple image noise generator"
 license = "MIT"
 repository = "https://github.com/r41ngee/ilovenoise"
-readme="README.md"
+readme = "README.md"
 
 [package.metadata.wix]
 upgrade-guid = "9C79645E-2765-4053-8AB3-FEB0BF2510AA"
@@ -19,12 +22,8 @@ clap_complete = "4"
 png = "0.18.1"
 rand = "0.10.1"
 rand_chacha = "0.10.0"
-rayon = "1.12.0"
-serde = { version = "1.0.228", features = ["derive"] }
-toml = "1.1.2"
 
-[dev-dependencies]
-insta = "1.48.0"
+ilovenoise-core = { path = "ilovenoise-core", features = ["tasking"] , version = "0.4.1" }
 
 [profile.dist]
 inherits = "release"
@@ -34,4 +33,4 @@ strip = true
 
 [build-dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
-clap_complete = "4"
+clap_complete = "4.6.5"
