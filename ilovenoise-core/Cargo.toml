@@ -2,6 +2,12 @@
 name = "ilovenoise-core"
 version = "0.1.0"
 edition = "2024"
+description = "Procedural noise generation algorithms (Perlin, random)"
+license = "MIT"
+repository = "https://github.com/r41ngee/ilovenoise"
+readme = "README.md"
+keywords = ["noise", "perlin", "image", "generator"]
+categories = ["multimedia::images"]
 
 [features]
 default = ["tasking"]
