@@ -5,7 +5,7 @@ pub mod util;
 #[cfg(feature = "tasking")]
 pub mod tasking;
 
-pub use algo::Aglorithm;
+pub use algo::Algorithm;
 
 #[cfg(feature = "tasking")]
 use rand_chacha::ChaCha8Rng;
@@ -15,7 +15,7 @@ pub fn create_mode(
     rand_thr: ChaCha8Rng,
     size: (u32, u32),
     config: &tasking::TaskConfig,
-) -> Result<Box<dyn Aglorithm>, Box<dyn std::error::Error>> {
+) -> Result<Box<dyn Algorithm>, Box<dyn std::error::Error>> {
     match config.mode.to_lowercase().as_str() {
         "random" => Ok(Box::new(algo::random_noise::RandomNoise::new(rand_thr))),
         "perlin" => {

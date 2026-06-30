@@ -36,7 +36,7 @@ impl Perlin {
     }
 }
 
-impl super::Aglorithm for Perlin {
+impl super::Algorithm for Perlin {
     fn draw(&mut self, image: &mut crate::image::Image) {
         let grid_w = self.size.0 / self.frequency + 1;
         let grid_h = self.size.1 / self.frequency + 1;
@@ -166,7 +166,7 @@ mod tests {
     use std::ops::Range;
 
     use super::*;
-    use crate::algo::Aglorithm;
+    use crate::algo::Algorithm;
     use rand::SeedableRng;
 
     const DEFAULT_SEED: u64 = 42u64;
