@@ -83,6 +83,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.103"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
+
+[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -432,12 +438,14 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 name = "ilovenoise"
 version = "0.4.1"
 dependencies = [
+ "anyhow",
  "clap",
  "clap_complete",
  "ilovenoise-core",
  "png",
  "rand",
  "rand_chacha",
+ "rayon",
 ]
 
 [[package]]
