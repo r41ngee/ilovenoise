@@ -49,13 +49,14 @@ fn main() -> Result<()> {
 }
 
 fn task_config_from_cli(args: &cli::Cli) -> TaskConfig {
+    let algo = args.algo.clone().unwrap_or_default();
     TaskConfig {
-        mode: args.algo.clone().unwrap_or_default(),
+        mode: algo.clone(),
         width: args.width,
         height: args.height,
         output: args.output_path.clone(),
         seed: args.seed,
-        perlin: (args.algo.as_deref() == Some("perlin")).then_some(tasking::PerlinConfig {
+        perlin: (algo == "perlin").then_some(tasking::PerlinConfig {
             octaves: args.octaves,
             persistence: args.persistence,
             lacunarity: args.lacunarity,

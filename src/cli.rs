@@ -17,7 +17,7 @@ pub struct Cli {
     #[arg(long, short)]
     pub output_path: Option<String>,
 
-    #[arg(long, short, help = format!("algorithms: check ilovenoise --help"))]
+    #[arg(long, short, help = "Algorithm: random | perlin", required_unless_present = "task_file")]
     pub algo: Option<String>,
     #[arg(long, short)]
     pub task_file: Option<String>,
