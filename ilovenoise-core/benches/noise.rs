@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use ilovenoise_core::{
-    algo::{self, Aglorithm},
+    algo::{self, Algorithm},
     image::Image,
     tasking::{self, TaskConfig},
     create_mode,

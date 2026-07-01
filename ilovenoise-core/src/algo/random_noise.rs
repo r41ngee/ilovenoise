@@ -1,4 +1,4 @@
-use super::Aglorithm;
+use super::Algorithm;
 use rand::RngExt;
 use rand_chacha::ChaCha8Rng;
 
@@ -15,7 +15,7 @@ impl RandomNoise {
     }
 }
 
-impl Aglorithm for RandomNoise {
+impl Algorithm for RandomNoise {
     fn draw(&mut self, image: &mut crate::image::Image) {
         let w = image.size.0 as usize;
         let seed: u64 = self.rng_thr.random_range(u64::MIN..=u64::MAX);
