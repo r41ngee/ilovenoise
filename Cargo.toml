@@ -9,6 +9,7 @@ description = "Simple image noise generator"
 license = "MIT"
 repository = "https://github.com/r41ngee/ilovenoise"
 readme = "README.md"
+exclude = [".github"]
 
 [package.metadata.wix]
 upgrade-guid = "9C79645E-2765-4053-8AB3-FEB0BF2510AA"
