@@ -7,7 +7,7 @@ use ilovenoise_core::{
 };
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
-use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 mod cli;
 
@@ -24,24 +24,8 @@ fn main() -> Result<()> {
     if let Some(taskfile) = &args.task_file {
         let tasks = tasking::load_tasks(taskfile)
             .map_err(|e| anyhow::anyhow!("{e}"))?;
-
-        let total = tasks.len();
-        println!("Running {total} tasks in parallel...");
-
         tasks.into_par_iter()
-            .enumerate()
-            .try_for_each(|(i, task)| {
-                let name = task.output.clone()
-                    .unwrap_or_else(|| "output.png".to_string());
-                eprintln!("[{}/{}] generating {name}...", i + 1, total);
-                let result = run_task(task);
-                eprint!("[{}/{}] ", i + 1, total);
-                match &result {
-                    Ok(()) => eprintln!("✓ {name}"),
-                    Err(e) => eprintln!("✗ {name}: {e}"),
-                }
-                result
-            })?;
+            .try_for_each(run_task)?;
         return Ok(());
     }
 
