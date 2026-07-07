@@ -24,8 +24,16 @@ fn main() -> Result<()> {
     if let Some(taskfile) = &args.task_file {
         let tasks = tasking::load_tasks(taskfile)
             .map_err(|e| anyhow::anyhow!("{e}"))?;
+        let total = tasks.len();
+        eprintln!("Running {total} tasks...");
         tasks.into_par_iter()
-            .try_for_each(run_task)?;
+            .try_for_each(|task| -> Result<()> {
+                let name = task.output.clone()
+                    .unwrap_or_else(|| "output.png".to_string());
+                run_task(task)?;
+                eprintln!("✓ {name}");
+                Ok(())
+            })?;
         return Ok(());
     }
 
