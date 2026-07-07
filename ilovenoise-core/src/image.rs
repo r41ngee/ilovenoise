@@ -17,8 +17,7 @@ impl Image {
     pub fn as_bytes(&self) -> Vec<u8> {
         let mut data = vec![0; self.size.0 as usize * self.size.1 as usize * 4];
 
-        #[allow(clippy::useless_conversion)]
-        for (index, pixel) in data.chunks_mut(4).into_iter().enumerate() {
+        for (index, pixel) in data.chunks_mut(4).enumerate() {
             pixel[0] = self.pixels[index].r;
             pixel[1] = self.pixels[index].g;
             pixel[2] = self.pixels[index].b;
