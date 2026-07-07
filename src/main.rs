@@ -8,6 +8,7 @@ use ilovenoise_core::{
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use std::sync::{Mutex, atomic::{AtomicUsize, Ordering}};
 
 mod cli;
 
@@ -24,8 +25,24 @@ fn main() -> Result<()> {
     if let Some(taskfile) = &args.task_file {
         let tasks = tasking::load_tasks(taskfile)
             .map_err(|e| anyhow::anyhow!("{e}"))?;
+        let total = tasks.len();
+        eprintln!("Running {total} tasks...");
+        let counter = Mutex::new(AtomicUsize::new(1));
         tasks.into_par_iter()
-            .try_for_each(run_task)?;
+            .try_for_each(|task| -> Result<()> {
+                let name = task.output.clone()
+                    .unwrap_or_else(|| "output.png".to_string());
+                run_task(task)?;
+                let idx = counter.lock();
+
+                let progress = if let Ok(index) = idx {
+                    index.fetch_add(1, Ordering::AcqRel)
+                } else {
+                    usize::MAX
+                };
+                eprintln!("[{}/{}] ✓ {name}", progress, total);
+                Ok(())
+            })?;
         return Ok(());
     }
 
