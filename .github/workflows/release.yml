@@ -310,10 +310,10 @@ jobs:
           submodules: recursive
       - name: Last build
         run: |
-          cargo build
+          cargo build --workspace
       - name: Dry-run publish
         run: |
-          cargo publish --dry-run
+          cargo publish --dry-run --workspace
       - name: Publish to crates.io
         run: |
-          cargo publish
+          cargo publish --workspace
