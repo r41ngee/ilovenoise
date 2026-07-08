@@ -95,7 +95,7 @@ jobs:
             artifacts/*.tar.gz artifacts/checksums.txt
 
   publish:
-    needs: create-release
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
